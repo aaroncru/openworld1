@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Anchorage Simulator Challenge</title>
 
-  <!-- Estilos de Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     body {
@@ -39,12 +36,19 @@
       z-index: 1000;
     }
 
-    #colorPicker {
+    #colorPicker, #shapeSelector {
       position: absolute;
-      top: 160px;
       right: 30px;
       display: none;
       z-index: 1000;
+    }
+
+    #colorPicker {
+      top: 160px;
+    }
+
+    #shapeSelector {
+      top: 200px;
     }
 
     #startButton {
@@ -70,21 +74,44 @@
 
   <button id="customButton">Custom</button>
   <input type="color" id="colorPicker" />
+  <select id="shapeSelector">
+    <option value="circle">Bolita</option>
+    <option value="square">Cuadrado</option>
+    <option value="triangle">Triángulo</option>
+    <option value="hexagon">Hexágono</option>
+    <option value="star">Estrella</option>
+  </select>
 
   <button id="startButton">Start</button>
   <div id="map"></div>
 
-  <!-- Script de Leaflet -->
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     let customMode = false;
     let selectedColor = "#ff0000";
+    let selectedShape = "circle";
     let marker = null;
     let map;
 
     const customButton = document.getElementById("customButton");
     const colorPicker = document.getElementById("colorPicker");
+    const shapeSelector = document.getElementById("shapeSelector");
+
+    customButton.addEventListener("click", () => {
+      if (!customMode) {
+        colorPicker.style.display = "block";
+        shapeSelector.style.display = "block";
+        customMode = true;
+      } else {
+        colorPicker.style.display = "none";
+        shapeSelector.style.display = "none";
+        selectedColor = colorPicker.value;
+        selectedShape = shapeSelector.value;
+        customMode = false;
+      }
+    });
 
     // Inicializa el mapa al cargar la página
     window.addEventListener("load", () => {
@@ -94,25 +121,19 @@
         attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
       }).addTo(map);
 
-      // Geolocalización automática
+      // Geolocalización del usuario
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
           (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
-            if (!marker) {
-              marker = L.circleMarker([lat, lng], {
-                radius: 10,
-                color: selectedColor,
-                fillColor: selectedColor,
-                fillOpacity: 1
-              }).addTo(map);
-              map.setView([lat, lng], 16);
-            } else {
-              marker.setLatLng([lat, lng]);
-              marker.setStyle({ color: selectedColor, fillColor: selectedColor });
+            if (marker) {
+              map.removeLayer(marker);
             }
+
+            marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
+            map.setView([lat, lng], 16);
           },
           (error) => {
             alert("No se pudo obtener tu ubicación.");
@@ -125,24 +146,85 @@
       }
     });
 
-    // Lógica del botón Custom
-    customButton.addEventListener("click", () => {
-      if (!customMode) {
-        colorPicker.style.display = "block";
-        customMode = true;
-      } else {
-        colorPicker.style.display = "none";
-        selectedColor = colorPicker.value;
-        customMode = false;
+    // Crea una figura personalizada según el tipo seleccionado
+    function createShapeMarker(lat, lng, shape, color) {
+      const size = 20;
+      const options = {
+        color: color,
+        fillColor: color,
+        fillOpacity: 1,
+        weight: 2
+      };
+
+      switch (shape) {
+        case "circle":
+          return L.circleMarker([lat, lng], {
+            radius: 10,
+            ...options
+          });
+
+        case "square":
+          const squareCoords = [
+            [lat + 0.0001, lng - 0.0001],
+            [lat + 0.0001, lng + 0.0001],
+            [lat - 0.0001, lng + 0.0001],
+            [lat - 0.0001, lng - 0.0001]
+          ];
+          return L.polygon(squareCoords, options);
+
+        case "triangle":
+          const triangleCoords = [
+            [lat + 0.00015, lng],
+            [lat - 0.0001, lng - 0.0001],
+            [lat - 0.0001, lng + 0.0001]
+          ];
+          return L.polygon(triangleCoords, options);
+
+        case "hexagon":
+          const r = 0.00012;
+          const hexCoords = [];
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i;
+            hexCoords.push([
+              lat + r * Math.cos(angle),
+              lng + r * Math.sin(angle)
+            ]);
+          }
+          return L.polygon(hexCoords, options);
+
+        case "star":
+          const starCoords = [
+            [lat + 0.0002, lng],
+            [lat + 0.00005, lng + 0.00005],
+            [lat + 0.0001, lng + 0.0002],
+            [lat, lng + 0.00008],
+            [lat - 0.0001, lng + 0.0002],
+            [lat - 0.00005, lng + 0.00005],
+            [lat - 0.0002, lng],
+            [lat - 0.00005, lng - 0.00005],
+            [lat - 0.0001, lng - 0.0002],
+            [lat, lng - 0.00008],
+            [lat + 0.0001, lng - 0.0002],
+            [lat + 0.00005, lng - 0.00005]
+          ];
+          return L.polygon(starCoords, options);
+
+        default:
+          return L.circleMarker([lat, lng], { radius: 10, ...options });
       }
-    });
+    }
 
     // Cambiar color en tiempo real
     colorPicker.addEventListener("input", (event) => {
       selectedColor = event.target.value;
-      if (marker) {
+      if (marker && marker.setStyle) {
         marker.setStyle({ color: selectedColor, fillColor: selectedColor });
       }
+    });
+
+    // Cambiar forma si el usuario la selecciona
+    shapeSelector.addEventListener("change", (event) => {
+      selectedShape = event.target.value;
     });
   </script>
 </body>
