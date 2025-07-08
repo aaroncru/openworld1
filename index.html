@@ -10,12 +10,12 @@
       padding: 0;
       background-color: white;
       font-family: Arial, sans-serif;
+      position: relative;
     }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
+      padding: 20px 0;
       background-color: #ffffff;
       color: #000000;
       font-size: 2em;
@@ -24,7 +24,10 @@
     }
 
     #customButton {
-      font-size: 0.5em;
+      position: absolute;
+      top: 80px; /* Más abajo del header */
+      right: 30px;
+      font-size: 1em;
       padding: 10px 20px;
       background-color: #333;
       color: white;
@@ -39,7 +42,7 @@
       background-color: red;
       border-radius: 50%;
       position: absolute;
-      top: 100px;
+      top: 140px;
       right: 50px;
       display: none; /* Oculta por defecto */
     }
@@ -47,10 +50,10 @@
 </head>
 <body>
   <header>
-    <div>Anchorage Simulator Challenge</div>
-    <button id="customButton">Custom</button>
+    Anchorage Simulator Challenge
   </header>
 
+  <button id="customButton">Custom</button>
   <div id="bolita"></div>
 
   <script>
