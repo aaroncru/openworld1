@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Anchorage Simulator Challenge</title>
 
-  <!-- Estilos de Leaflet -->
+  <!-- Estilos de Leaflet (sin integrity ni crossorigin) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-o9N1j7kVQfO9E2Xxy6eHKDZJdN/t/c5LD+wT5ZjKNuU="
-    crossorigin=""
   />
+
   <style>
     body {
       margin: 0;
@@ -75,10 +74,8 @@
   <button id="startButton">Start</button>
   <div id="map"></div>
 
-  <!-- Script de Leaflet -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  </script>
+  <!-- Script de Leaflet (sin integrity ni crossorigin) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     let customMode = false;
