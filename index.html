@@ -53,6 +53,33 @@
       right: 50px;
       display: none;
     }
+
+    .center-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 80px;
+    }
+
+    #startButton {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #map {
+      width: 90%;
+      max-width: 800px;
+      height: 400px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
@@ -64,6 +91,19 @@
   <input type="color" id="colorPicker" />
 
   <div id="bolita"></div>
+
+  <div class="center-container">
+    <button id="startButton">Start</button>
+
+    <!-- Mapa de Google Maps embebido -->
+    <iframe
+      id="map"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d53703.539293020586!2d-149.9204449!3d61.217575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x56c890c2c4d2ed69%3A0xc37080243058f424!2sAnchorage%2C%20Alaska%2C%20EE.%20UU.!5e0!3m2!1ses!2smx!4v1720460030000!5m2!1ses!2smx"
+      allowfullscreen=""
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+  </div>
 
   <script>
     const button = document.getElementById('customButton');
