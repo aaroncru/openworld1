@@ -1,158 +1,29 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anchorage Simulator Challenge</title>
-
-  <!-- Estilo de Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-o9N1j7kVQfO9E2Xxy6eHKDZJdN/t/c5LD+wT5ZjKNuU="
-    crossorigin=""
-  />
+  <title>Mapa Leaflet</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    header {
-      text-align: center;
-      padding: 20px;
-      font-size: 2em;
-      background-color: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    #customButton {
-      position: absolute;
-      top: 120px;
-      right: 30px;
-      font-size: 0.8em;
-      padding: 6px 12px;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    #colorPicker {
-      position: absolute;
-      top: 160px;
-      right: 30px;
-      display: none;
-      z-index: 1000;
-    }
-
-    #startButton {
-      display: block;
-      margin: 30px auto 10px auto;
-      padding: 12px 24px;
-      font-size: 1.2em;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
     #map {
-      width: 100%;
       height: 500px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <header>Anchorage Simulator Challenge</header>
 
-  <button id="customButton">Custom</button>
-  <input type="color" id="colorPicker" />
+<div id="map"></div>
 
-  <button id="startButton">Start</button>
-  <div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map').setView([61.2175, -149.8938], 14);
 
-  <!-- Scripts de Leaflet -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-oEdl+5H9Fh9wPbGvlfkJzv3ddToMXM8FwkHkJr0Cgr4="
-    crossorigin="">
-  </script>
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+</script>
 
-  <script>
-    let customMode = false;
-    let selectedColor = "#ff0000";
-    let marker = null;
-    let mapInitialized = false;
-    let map;
-
-    const customButton = document.getElementById("customButton");
-    const colorPicker = document.getElementById("colorPicker");
-
-    customButton.addEventListener("click", () => {
-      if (!customMode) {
-        colorPicker.style.display = "block";
-        customMode = true;
-      } else {
-        colorPicker.style.display = "none";
-        selectedColor = colorPicker.value;
-        customMode = false;
-      }
-    });
-
-    document.getElementById("startButton").addEventListener("click", () => {
-      if (!mapInitialized) {
-        // Inicializa el mapa centrado en Downtown Anchorage
-        map = L.map("map").setView([61.2175, -149.8938], 14);
-
-        // Carga el mapa de OpenStreetMap
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        mapInitialized = true;
-      }
-
-      // Solicita la ubicación del usuario
-      if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            if (!marker) {
-              marker = L.circleMarker([lat, lng], {
-                radius: 10,
-                color: selectedColor,
-                fillColor: selectedColor,
-                fillOpacity: 1
-              }).addTo(map);
-              map.setView([lat, lng], 16); // Centra al usuario
-            } else {
-              marker.setLatLng([lat, lng]);
-              marker.setStyle({ color: selectedColor, fillColor: selectedColor });
-            }
-          },
-          (error) => {
-            alert("No se pudo obtener tu ubicación.");
-            console.error(error);
-          },
-          { enableHighAccuracy: true }
-        );
-      } else {
-        alert("Tu navegador no soporta geolocalización.");
-      }
-    });
-
-    colorPicker.addEventListener("input", (event) => {
-      selectedColor = event.target.value;
-      if (marker) {
-        marker.setStyle({ color: selectedColor, fillColor: selectedColor });
-      }
-    });
-  </script>
 </body>
 </html>
