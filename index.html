@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Anchorage Simulator Challenge</title>
 
-  <!-- Estilos de Leaflet (sin integrity ni crossorigin) -->
+  <!-- Estilos de Leaflet -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -74,44 +74,27 @@
   <button id="startButton">Start</button>
   <div id="map"></div>
 
-  <!-- Script de Leaflet (sin integrity ni crossorigin) -->
+  <!-- Script de Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     let customMode = false;
     let selectedColor = "#ff0000";
     let marker = null;
-    let mapInitialized = false;
     let map;
 
     const customButton = document.getElementById("customButton");
     const colorPicker = document.getElementById("colorPicker");
 
-    customButton.addEventListener("click", () => {
-      if (!customMode) {
-        colorPicker.style.display = "block";
-        customMode = true;
-      } else {
-        colorPicker.style.display = "none";
-        selectedColor = colorPicker.value;
-        customMode = false;
-      }
-    });
+    // Inicializa el mapa al cargar la página
+    window.addEventListener("load", () => {
+      map = L.map("map").setView([61.2175, -149.8938], 14);
 
-    document.getElementById("startButton").addEventListener("click", () => {
-      if (!mapInitialized) {
-        // Inicializa el mapa centrado en Downtown Anchorage
-        map = L.map("map").setView([61.2175, -149.8938], 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+      }).addTo(map);
 
-        // Agrega los tiles de OpenStreetMap
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        mapInitialized = true;
-      }
-
-      // Geolocalización del usuario
+      // Geolocalización automática
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
           (position) => {
@@ -142,6 +125,19 @@
       }
     });
 
+    // Lógica del botón Custom
+    customButton.addEventListener("click", () => {
+      if (!customMode) {
+        colorPicker.style.display = "block";
+        customMode = true;
+      } else {
+        colorPicker.style.display = "none";
+        selectedColor = colorPicker.value;
+        customMode = false;
+      }
+    });
+
+    // Cambiar color en tiempo real
     colorPicker.addEventListener("input", (event) => {
       selectedColor = event.target.value;
       if (marker) {
