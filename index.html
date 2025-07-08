@@ -25,9 +25,9 @@
 
     #customButton {
       position: absolute;
-      top: 120px; /* más abajo */
+      top: 120px;
       right: 30px;
-      font-size: 0.8em; /* más chico */
+      font-size: 0.8em;
       padding: 6px 12px;
       background-color: #333;
       color: white;
@@ -40,17 +40,6 @@
       position: absolute;
       top: 160px;
       right: 30px;
-      display: none;
-    }
-
-    #bolita {
-      width: 30px;
-      height: 30px;
-      background-color: red;
-      border-radius: 50%;
-      position: absolute;
-      top: 200px;
-      right: 50px;
       display: none;
     }
 
@@ -90,48 +79,91 @@
   <button id="customButton">Custom</button>
   <input type="color" id="colorPicker" />
 
-  <div id="bolita"></div>
-
   <div class="center-container">
     <button id="startButton">Start</button>
-
-    <!-- Mapa centrado en Downtown Anchorage con vista satelital -->
-    <iframe
-      id="map"
-      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d10931.569237410997!2d-149.8890!3d61.2175!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x56c890cfb2a2504f%3A0x6f5c5e7fdac9d9fc!2sDowntown%20Anchorage!5e0!3m2!1ses!2smx!4v1720461780000!5m2!1ses!2smx&maptype=satellite"
-      allowfullscreen=""
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
+    <div id="map"></div>
   </div>
 
   <script>
-    const customButton = document.getElementById('customButton');
-    const colorPicker = document.getElementById('colorPicker');
-    const bolita = document.getElementById('bolita');
+    let customMode = false;
+    let selectedColor = "#ff0000";
+    let userMarker = null;
+    let map;
 
-    let customMode = false; // false = cerrado, true = abierto
-    let selectedColor = '#ff0000'; // color por defecto
+    const customButton = document.getElementById("customButton");
+    const colorPicker = document.getElementById("colorPicker");
 
-    customButton.addEventListener('click', () => {
+    customButton.addEventListener("click", () => {
       if (!customMode) {
-        // Modo activado: mostrar el selector
-        colorPicker.style.display = 'block';
+        colorPicker.style.display = "block";
         customMode = true;
       } else {
-        // Modo desactivado: ocultar el selector y guardar color
-        colorPicker.style.display = 'none';
-        bolita.style.display = 'none';
+        colorPicker.style.display = "none";
         selectedColor = colorPicker.value;
         customMode = false;
       }
     });
 
-    colorPicker.addEventListener('input', (event) => {
-      const color = event.target.value;
-      bolita.style.backgroundColor = color;
-      bolita.style.display = 'block';
+    colorPicker.addEventListener("input", () => {
+      selectedColor = colorPicker.value;
+      if (userMarker) {
+        userMarker.setIcon({
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: selectedColor,
+          fillOpacity: 1,
+          strokeWeight: 1,
+        });
+      }
     });
+
+    document.getElementById("startButton").addEventListener("click", () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          position => {
+            const { latitude, longitude } = position.coords;
+
+            const userLocation = { lat: latitude, lng: longitude };
+
+            if (!map) {
+              map = new google.maps.Map(document.getElementById("map"), {
+                center: userLocation,
+                zoom: 16,
+                mapTypeId: "satellite",
+              });
+            }
+
+            if (!userMarker) {
+              userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: {
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 10,
+                  fillColor: selectedColor,
+                  fillOpacity: 1,
+                  strokeWeight: 1,
+                },
+              });
+            } else {
+              userMarker.setPosition(userLocation);
+            }
+          },
+          error => {
+            alert("No se pudo obtener tu ubicación.");
+            console.error(error);
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+    });
+  </script>
+
+  <!-- ✅ Reemplaza "YOUR_API_KEY" con tu clave de API de Google Maps -->
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
   </script>
 </body>
 </html>
