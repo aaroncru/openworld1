@@ -223,9 +223,16 @@
     });
 
     // Cambiar forma si el usuario la selecciona
-    shapeSelector.addEventListener("change", (event) => {
-      selectedShape = event.target.value;
-    });
+   shapeSelector.addEventListener("change", (event) => {
+  selectedShape = event.target.value;
+
+  if (marker && marker.getLatLng) {
+    const pos = marker.getLatLng();
+    map.removeLayer(marker);
+    marker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+  }
+});
+
   </script>
 </body>
 </html>
