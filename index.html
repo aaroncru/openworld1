@@ -156,16 +156,21 @@
         fillOpacity: 1,
         weight: 2
       };
+      const lngFactor = 0.5;
+      const offset = 0.00005;
+      const tOffset = 0.000045;
+      const r = 0.00006;
+      const outerR = 0.00008;
+      const innerR = 0.000035;
 
       switch (shape) {
         case "circle":
           return L.circleMarker([lat, lng], {
-            radius: 10,
+            radius: 6,
             ...options
           });
 
         case "square":
-          const offset = 0.0001;
           const squareCoords = [
             [lat + offset, lng - offset / lngFactor],
             [lat + offset, lng + offset / lngFactor],
@@ -176,7 +181,6 @@
           return L.polygon(squareCoords, options);
 
           case "triangle":
-              const tOffset = 0.00009;
               const triangleCoords = [
                 [lat + tOffset, lng],                                  // vértice superior
                 [lat - tOffset, lng - tOffset / lngFactor],            // vértice inferior izquierdo
@@ -186,7 +190,6 @@
           return L.polygon(triangleCoords, options);
 
           case "hexagon":
-            const r = 0.00012;
             const hexCoords = [];
       for (let i = 0; i < 6; i++) {
             const angle = (Math.PI / 3) * i;
@@ -201,8 +204,6 @@
 
 
         case "star":
-  const outerR = 0.0002;
-  const innerR = 0.00008;
   const starCoords = [];
 
   for (let i = 0; i < 10; i++) {
