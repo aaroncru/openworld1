@@ -79,6 +79,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
   </style>
 </head>
 <body>
@@ -105,19 +106,29 @@
   <div id="mapPantalla" style="height: 60vh;"></div>
   <div id="objetivos" style="padding: 20px;">
   <h3>Mission Objetives:</h3>
-  <ul>
-    <li>📍 Llegar al punto de anclaje.</li>
-    <li>⚙️ Configurar parámetros personalizados.</li>
-    <li>🧭 Mantener señal GPS estable.</li>
-    <li>🚩 Completar todos los checkpoints.</li>
+  <ul id="listaObjetivos">
+    <li id="obj1">📍 Llegar al punto de anclaje</li>
+    <li id="obj2">⚙️ Configurar parámetros personalizados</li>
+    <li id="obj3">🧭 Mantener señal GPS estable</li>
+    <li id="obj4">🚩 Completar todos los checkpoints</li>
   </ul>
 </div>
+
 </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+   const objetivosData = [
+  { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.218, lng: -149.893 },
+  { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.219, lng: -149.894 },
+  { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.217, lng: -149.895 },
+  { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.216, lng: -149.892 }
+];
+
+let objetivoMarkers = []; // Para guardar los marcadores
+let completados = new Set(); // Seguimiento de objetivos logrados
   let customMode = false;
   let selectedColor = "#ff0000";
   let selectedShape = "circle";
@@ -152,26 +163,38 @@
     }).addTo(map);
 
     if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          lastPosition = { lat, lng };
+   navigator.geolocation.watchPosition(
+  (position) => {
+    const userLat = position.coords.latitude;
+    const userLng = position.coords.longitude;
 
-          if (marker) map.removeLayer(marker);
-          marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
-          map.setView([lat, lng], 16);
-        },
-        (error) => {
-          alert("No se pudo obtener tu ubicación.");
-          console.error(error);
-        },
-        { enableHighAccuracy: true }
+    // Revisa cada objetivo
+    objetivoMarkers.forEach((marker, index) => {
+      const obj = objetivosData[index];
+      if (!completados.has(obj.id)) {
+        const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
+        if (dist < 20) {
+          completados.add(obj.id);
+
+          // ✅ Cambia emoji
+          marker.setIcon(L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="font-size: 24px;">✅</div>`
+          }));
+
+          // ✅ Tacha en la lista
+          const li = document.getElementById(obj.id);
+          if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
+        }
+      }
+    });
+  },
+  (error) => {
+    console.error("Geolocation error:", error);
+  },
+  { enableHighAccuracy: true }
       );
-    } else {
-      alert("Tu navegador no soporta geolocalización.");
-    }
-  });
+
 
   function createShapeMarker(lat, lng, shape, color) {
     const lngFactor = 0.5;
@@ -256,6 +279,17 @@
       const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
       map2.setView([lastPosition.lat, lastPosition.lng], 16);
     }
+    objetivosData.forEach(obj => {
+  const marker = L.marker([obj.lat, obj.lng], {
+    icon: L.divIcon({
+      className: 'custom-icon',
+      html: `<div style="font-size: 24px;">${obj.emoji}</div>`
+    })
+  }).addTo(map2);
+  marker.objetivoId = obj.id;
+  objetivoMarkers.push(marker);
+});
+
   });
 
  const toggleBtn = document.getElementById("toggleSizeBtn");
@@ -277,6 +311,20 @@ toggleBtn.addEventListener("click", () => {
 
   if (map2) map2.invalidateSize();
 });
+function getDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371e3; // metros
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  return R * c;
+}
 
 </script>
 </body>
