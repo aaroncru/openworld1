@@ -79,7 +79,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
   </style>
 </head>
 <body>
@@ -105,194 +104,195 @@
   <button id="toggleSizeBtn">Expandir</button>
   <div id="mapPantalla" style="height: 60vh;"></div>
   <div id="objetivos" style="padding: 20px;">
-  <h3>Mission Objetives:</h3>
-  <ul id="listaObjetivos">
-    <li id="obj1">📍 Llegar al punto de anclaje</li>
-    <li id="obj2">⚙️ Configurar parámetros personalizados</li>
-    <li id="obj3">🧭 Mantener señal GPS estable</li>
-    <li id="obj4">🚩 Completar todos los checkpoints</li>
-  </ul>
-</div>
-
+    <h3>Mission Objectives:</h3>
+    <ul id="listaObjetivos">
+      <li id="obj1">📍 Llegar al punto de anclaje</li>
+      <li id="obj2">⚙️ Configurar parámetros personalizados</li>
+      <li id="obj3">🧭 Mantener señal GPS estable</li>
+      <li id="obj4">🚩 Completar todos los checkpoints</li>
+    </ul>
+  </div>
 </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-   const objetivosData = [
+const objetivosData = [
   { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.218, lng: -149.893 },
   { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.219, lng: -149.894 },
   { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.217, lng: -149.895 },
   { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.216, lng: -149.892 }
 ];
 
-let objetivoMarkers = []; // Para guardar los marcadores
-let completados = new Set(); // Seguimiento de objetivos logrados
-  let customMode = false;
-  let selectedColor = "#ff0000";
-  let selectedShape = "circle";
-  let marker = null;
-  let map, map2;
-  let lastPosition = null;
-  let mapExpanded = false;
+let objetivoMarkers = [];
+let completados = new Set();
+let customMode = false;
+let selectedColor = "#ff0000";
+let selectedShape = "circle";
+let marker = null;
+let map, map2;
+let lastPosition = null;
+let mapExpanded = false;
 
-  const customButton = document.getElementById("customButton");
-  const colorPicker = document.getElementById("colorPicker");
-  const shapeSelector = document.getElementById("shapeSelector");
+const customButton = document.getElementById("customButton");
+const colorPicker = document.getElementById("colorPicker");
+const shapeSelector = document.getElementById("shapeSelector");
 
-  customButton.addEventListener("click", () => {
-    if (!customMode) {
-      colorPicker.style.display = "block";
-      shapeSelector.style.display = "block";
-      customMode = true;
-    } else {
-      colorPicker.style.display = "none";
-      shapeSelector.style.display = "none";
-      selectedColor = colorPicker.value;
-      selectedShape = shapeSelector.value;
-      customMode = false;
-    }
-  });
+customButton.addEventListener("click", () => {
+  const show = !customMode;
+  colorPicker.style.display = show ? "block" : "none";
+  shapeSelector.style.display = show ? "block" : "none";
+  customMode = show;
 
-  // Inicializar mapa principal
-  window.addEventListener("load", () => {
-    map = L.map("map").setView([61.2175, -149.8938], 14);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    if (navigator.geolocation) {
-   navigator.geolocation.watchPosition(
-  (position) => {
-    const userLat = position.coords.latitude;
-    const userLng = position.coords.longitude;
-
-    // Revisa cada objetivo
-    objetivoMarkers.forEach((marker, index) => {
-      const obj = objetivosData[index];
-      if (!completados.has(obj.id)) {
-        const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
-        if (dist < 20) {
-          completados.add(obj.id);
-
-          // ✅ Cambia emoji
-          marker.setIcon(L.divIcon({
-            className: 'custom-icon',
-            html: `<div style="font-size: 24px;">✅</div>`
-          }));
-
-          // ✅ Tacha en la lista
-          const li = document.getElementById(obj.id);
-          if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
-        }
-      }
-    });
-  },
-  (error) => {
-    console.error("Geolocation error:", error);
-  },
-  { enableHighAccuracy: true }
-      );
-
-
-  function createShapeMarker(lat, lng, shape, color) {
-    const lngFactor = 0.5;
-    const options = { color, fillColor: color, fillOpacity: 1, weight: 2 };
-    const offset = 0.000025;
-    const tOffset = 0.000020;
-    const r = 0.00003;
-    const outerR = 0.00004;
-    const innerR = 0.0000175;
-
-    switch (shape) {
-      case "circle":
-        return L.circleMarker([lat, lng], { radius: 7, ...options });
-
-      case "square":
-        return L.polygon([
-          [lat + offset, lng - offset / lngFactor],
-          [lat + offset, lng + offset / lngFactor],
-          [lat - offset, lng + offset / lngFactor],
-          [lat - offset, lng - offset / lngFactor]
-        ], options);
-
-      case "triangle":
-        return L.polygon([
-          [lat + tOffset, lng],
-          [lat - tOffset, lng - tOffset / lngFactor],
-          [lat - tOffset, lng + tOffset / lngFactor]
-        ], options);
-
-      case "hexagon":
-        const hexCoords = [];
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI / 3) * i;
-          const dx = r * Math.cos(angle);
-          const dy = r * Math.sin(angle);
-          hexCoords.push([lat + dy, lng + dx / lngFactor]);
-        }
-        return L.polygon(hexCoords, options);
-
-      case "star":
-        const starCoords = [];
-        for (let i = 0; i < 10; i++) {
-          const angle = (Math.PI / 5) * i;
-          const rad = i % 2 === 0 ? outerR : innerR;
-          const dx = rad * Math.cos(angle);
-          const dy = rad * Math.sin(angle);
-          starCoords.push([lat + dy, lng + dx / lngFactor]);
-        }
-        return L.polygon(starCoords, options);
-
-      default:
-        return L.circleMarker([lat, lng], { radius: 10, ...options });
-    }
+  if (!show) {
+    selectedColor = colorPicker.value;
+    selectedShape = shapeSelector.value;
   }
-
-  colorPicker.addEventListener("input", (e) => {
-    selectedColor = e.target.value;
-    if (marker && marker.setStyle) {
-      marker.setStyle({ color: selectedColor, fillColor: selectedColor });
-    }
-  });
-
-  shapeSelector.addEventListener("change", (e) => {
-    selectedShape = e.target.value;
-    if (marker && marker.getLatLng) {
-      const pos = marker.getLatLng();
-      map.removeLayer(marker);
-      marker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
-    }
-  });
-
-  document.getElementById("startButton").addEventListener("click", () => {
-    document.getElementById("inicioPantalla").style.display = "none";
-    document.getElementById("pantallaJuego").style.display = "block";
-
-    map2 = L.map("mapPantalla").setView([61.2175, -149.8938], 14);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(map2);
-
-    if (lastPosition) {
-      const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
-      map2.setView([lastPosition.lat, lastPosition.lng], 16);
-    }
-    objetivosData.forEach(obj => {
-  const marker = L.marker([obj.lat, obj.lng], {
-    icon: L.divIcon({
-      className: 'custom-icon',
-      html: `<div style="font-size: 24px;">${obj.emoji}</div>`
-    })
-  }).addTo(map2);
-  marker.objetivoId = obj.id;
-  objetivoMarkers.push(marker);
 });
 
+function createShapeMarker(lat, lng, shape, color) {
+  const lngFactor = 0.5;
+  const options = { color, fillColor: color, fillOpacity: 1, weight: 2 };
+  const offset = 0.000025;
+  const tOffset = 0.000020;
+  const r = 0.00003;
+  const outerR = 0.00004;
+  const innerR = 0.0000175;
+
+  switch (shape) {
+    case "circle":
+      return L.circleMarker([lat, lng], { radius: 7, ...options });
+
+    case "square":
+      return L.polygon([
+        [lat + offset, lng - offset / lngFactor],
+        [lat + offset, lng + offset / lngFactor],
+        [lat - offset, lng + offset / lngFactor],
+        [lat - offset, lng - offset / lngFactor]
+      ], options);
+
+    case "triangle":
+      return L.polygon([
+        [lat + tOffset, lng],
+        [lat - tOffset, lng - tOffset / lngFactor],
+        [lat - tOffset, lng + tOffset / lngFactor]
+      ], options);
+
+    case "hexagon":
+      const hexCoords = [];
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i;
+        const dx = r * Math.cos(angle);
+        const dy = r * Math.sin(angle);
+        hexCoords.push([lat + dy, lng + dx / lngFactor]);
+      }
+      return L.polygon(hexCoords, options);
+
+    case "star":
+      const starCoords = [];
+      for (let i = 0; i < 10; i++) {
+        const angle = (Math.PI / 5) * i;
+        const rad = i % 2 === 0 ? outerR : innerR;
+        const dx = rad * Math.cos(angle);
+        const dy = rad * Math.sin(angle);
+        starCoords.push([lat + dy, lng + dx / lngFactor]);
+      }
+      return L.polygon(starCoords, options);
+
+    default:
+      return L.circleMarker([lat, lng], { radius: 10, ...options });
+  }
+}
+
+function getDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371e3;
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  return R * c;
+}
+
+window.addEventListener("load", () => {
+  map = L.map("map").setView([61.2175, -149.8938], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        lastPosition = { lat: userLat, lng: userLng };
+      },
+      (err) => console.error("Geolocation error:", err),
+      { enableHighAccuracy: true }
+    );
+  }
+});
+
+document.getElementById("startButton").addEventListener("click", () => {
+  document.getElementById("inicioPantalla").style.display = "none";
+  document.getElementById("pantallaJuego").style.display = "block";
+
+  map2 = L.map("mapPantalla").setView([61.2175, -149.8938], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }).addTo(map2);
+
+  if (lastPosition) {
+    const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
+    map2.setView([lastPosition.lat, lastPosition.lng], 16);
+  }
+
+  objetivosData.forEach(obj => {
+    const marker = L.marker([obj.lat, obj.lng], {
+      icon: L.divIcon({
+        className: 'custom-icon',
+        html: `<div style="font-size: 24px;">${obj.emoji}</div>`
+      })
+    }).addTo(map2);
+    marker.objetivoId = obj.id;
+    objetivoMarkers.push(marker);
   });
 
- const toggleBtn = document.getElementById("toggleSizeBtn");
+  navigator.geolocation.watchPosition(
+    (position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      objetivoMarkers.forEach((marker, index) => {
+        const obj = objetivosData[index];
+        if (!completados.has(obj.id)) {
+          const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
+          if (dist < 20) {
+            completados.add(obj.id);
+
+            marker.setIcon(L.divIcon({
+              className: 'custom-icon',
+              html: `<div style="font-size: 24px;">✅</div>`
+            }));
+
+            const li = document.getElementById(obj.id);
+            if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
+          }
+        }
+      });
+    },
+    (err) => console.error("Geolocation error (map2):", err),
+    { enableHighAccuracy: true }
+  );
+});
+
+const toggleBtn = document.getElementById("toggleSizeBtn");
 const mapPantalla = document.getElementById("mapPantalla");
 const objetivos = document.getElementById("objetivos");
 
@@ -311,21 +311,6 @@ toggleBtn.addEventListener("click", () => {
 
   if (map2) map2.invalidateSize();
 });
-function getDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371e3; // metros
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lng2 - lng1) * Math.PI / 180;
-
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-  return R * c;
-}
-
 </script>
 </body>
 </html>
