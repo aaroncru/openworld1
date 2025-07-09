@@ -75,11 +75,11 @@
   <button id="customButton">Custom</button>
   <input type="color" id="colorPicker" />
   <select id="shapeSelector">
-    <option value="circle">Bolita</option>
-    <option value="square">Cuadrado</option>
-    <option value="triangle">Triángulo</option>
-    <option value="hexagon">Hexágono</option>
-    <option value="star">Estrella</option>
+    <option value="circle">Ball</option>
+    <option value="square">Square</option>
+    <option value="triangle">Triangle</option>
+    <option value="hexagon">Hexagone</option>
+    <option value="star">Star</option>
   </select>
 
   <button id="startButton">Start</button>
@@ -174,14 +174,14 @@
 
         case "triangle":
           const triangleCoords = [
-            [lat + 0.00015, lng],
+            [lat + 0.00010, lng],
             [lat - 0.0001, lng - 0.0001],
             [lat - 0.0001, lng + 0.0001]
           ];
           return L.polygon(triangleCoords, options);
 
         case "hexagon":
-          const r = 0.00012;
+          const r = 0.00010;
           const hexCoords = [];
           for (let i = 0; i < 6; i++) {
             const angle = (Math.PI / 3) * i;
