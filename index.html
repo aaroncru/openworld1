@@ -121,10 +121,10 @@
 
 <script>
 const objetivosData = [
-  { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.218, lng: -149.893 },
-  { id: "obj2", emoji: "📍", name: "Parámetros", lat: 61.219, lng: -149.894 },
-  { id: "obj3", emoji: "📍", name: "GPS", lat: 61.217, lng: -149.895 },
-  { id: "obj4", emoji: "📍", name: "Checkpoints", lat: 61.216, lng: -149.892 }
+  { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.2175, lng: -149.8938 },
+  { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.2176, lng: -149.8939 },
+  { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.2174, lng: -149.8937 },
+  { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.2175, lng: -149.8940 }
 ];
 
 let objetivoMarkers = [];
@@ -307,7 +307,7 @@ document.getElementById("startButton").addEventListener("click", () => {
         const obj = objetivosData[index];
         if (!completados.has(obj.id)) {
           const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
-          if (dist < 20) {
+          if (dist < 10) {
             completados.add(obj.id);
 
             marker.setIcon(L.divIcon({
