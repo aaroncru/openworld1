@@ -282,8 +282,10 @@ document.getElementById("startButton").addEventListener("click", () => {
     attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
   }).addTo(map2);
 
+  let userMarker2 = null; // NUEVA VARIABLE
+
   if (lastPosition) {
-    const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
+    userMarker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
     map2.setView([lastPosition.lat, lastPosition.lng], 16);
   }
 
@@ -303,37 +305,47 @@ document.getElementById("startButton").addEventListener("click", () => {
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
 
+      // 🔁 ACTUALIZAR MARCADOR EN VIVO
+      if (userMarker2) {
+        userMarker2.setLatLng([userLat, userLng]);
+      } else {
+        userMarker2 = createShapeMarker(userLat, userLng, selectedShape, selectedColor).addTo(map2);
+      }
+
+      // 🔁 CENTRAR MAPA EN USUARIO
+      map2.setView([userLat, userLng], map2.getZoom());
+
       objetivoMarkers.forEach((marker, index) => {
         const obj = objetivosData[index];
         if (!completados.has(obj.id)) {
           const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
-        if (dist < 7) {
-  completados.add(obj.id);
+          if (dist < 7) {
+            completados.add(obj.id);
 
-  marker.setIcon(L.divIcon({
-    className: 'custom-icon',
-    html: `<div style="font-size: 24px;">✅</div>`
-  }));
+            marker.setIcon(L.divIcon({
+              className: 'custom-icon',
+              html: `<div style="font-size: 24px;">✅</div>`
+            }));
 
-  const li = document.getElementById(obj.id);
-  if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
+            const li = document.getElementById(obj.id);
+            if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
 
-  // Mostrar mensaje especial para obj3
-  if (obj.id === "obj3") {
-    const msgDiv = document.getElementById("graemeMsg");
-    msgDiv.style.display = "block";
-    setTimeout(() => {
-      msgDiv.style.display = "none";
-    }, 5000);
+            if (obj.id === "obj3") {
+              const msgDiv = document.getElementById("graemeMsg");
+              msgDiv.style.display = "block";
+              setTimeout(() => {
+                msgDiv.style.display = "none";
+              }, 5000);
+            }
+          }
         }
-        }      
-        }
-        });
-        },
+      });
+    },
     (err) => console.error("Geolocation error (map2):", err),
     { enableHighAccuracy: true }
   );
 });
+
 
 const toggleBtn = document.getElementById("toggleSizeBtn");
 const mapPantalla = document.getElementById("mapPantalla");
