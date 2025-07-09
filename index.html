@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Anchorage Simulator Challenge</title>
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -43,13 +41,8 @@
       z-index: 1000;
     }
 
-    #colorPicker {
-      top: 160px;
-    }
-
-    #shapeSelector {
-      top: 200px;
-    }
+    #colorPicker { top: 160px; }
+    #shapeSelector { top: 200px; }
 
     #startButton {
       display: block;
@@ -63,209 +56,208 @@
       cursor: pointer;
     }
 
-    #map {
+    #map, #mapPantalla {
       width: 100%;
-      height: 500px;
+    }
+
+    #pantallaJuego {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      position: relative;
+    }
+
+    #toggleSizeBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-<body>
-  <!-- Pantalla de inicio -->
-  <div id="inicioPantalla">
-    <header>Anchorage Simulator Challenge</header>
-    <button id="customButton">Custom</button>
-    <input type="color" id="colorPicker" />
-    <select id="shapeSelector">
-      <option value="circle">Ball</option>
-      <option value="square">Square</option>
-      <option value="triangle">Triangle</option>
-      <option value="hexagon">Hexagone</option>
-      <option value="star">Star</option>
-    </select>
-    <button id="startButton">Start</button>
-    <div id="map" style="width: 100%; height: 400px;"></div>
-  </div>
 
-  <!-- Segunda pantalla (pantalla extendida) -->
-  <div id="pantallaJuego" style="display:none; width: 100%; height: 100vh;">
-    <div id="mapPantalla" style="width: 100%; height: 100vh;"></div>
-  </div>
+<!-- Pantalla de inicio -->
+<div id="inicioPantalla">
+  <header>Anchorage Simulator Challenge</header>
+  <button id="customButton">Custom</button>
+  <input type="color" id="colorPicker" />
+  <select id="shapeSelector">
+    <option value="circle">Ball</option>
+    <option value="square">Square</option>
+    <option value="triangle">Triangle</option>
+    <option value="hexagon">Hexagone</option>
+    <option value="star">Star</option>
+  </select>
+  <button id="startButton">Start</button>
+  <div id="map" style="height: 400px;"></div>
+</div>
 
+<!-- Segunda pantalla -->
+<div id="pantallaJuego">
+  <button id="toggleSizeBtn">Expandir</button>
+  <div id="mapPantalla" style="height: 60vh;"></div>
+</div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script>
-    let customMode = false;
-    let selectedColor = "#ff0000";
-    let selectedShape = "circle";
-    let marker = null;
-    let map;
-    let lastPosition = null;
+<script>
+  let customMode = false;
+  let selectedColor = "#ff0000";
+  let selectedShape = "circle";
+  let marker = null;
+  let map, map2;
+  let lastPosition = null;
+  let mapExpanded = false;
 
+  const customButton = document.getElementById("customButton");
+  const colorPicker = document.getElementById("colorPicker");
+  const shapeSelector = document.getElementById("shapeSelector");
 
-    const customButton = document.getElementById("customButton");
-    const colorPicker = document.getElementById("colorPicker");
-    const shapeSelector = document.getElementById("shapeSelector");
-
-    customButton.addEventListener("click", () => {
-      if (!customMode) {
-        colorPicker.style.display = "block";
-        shapeSelector.style.display = "block";
-        customMode = true;
-      } else {
-        colorPicker.style.display = "none";
-        shapeSelector.style.display = "none";
-        selectedColor = colorPicker.value;
-        selectedShape = shapeSelector.value;
-        customMode = false;
-      }
-    });
-
-    // Inicializa el mapa al cargar la página
-  window.addEventListener("load", () => {
-  map = L.map("map").setView([61.2175, -149.8938], 14);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-  }).addTo(map);
-
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        lastPosition = { lat, lng };
-
-        if (marker) map.removeLayer(marker);
-        marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
-        map.setView([lat, lng], 16);
-      },
-      (error) => {
-        alert("No se pudo obtener tu ubicación.");
-        console.error(error);
-      },
-      { enableHighAccuracy: true }
-    );
-  } else {
-    alert("Tu navegador no soporta geolocalización.");
-  }
-});
-
-
-    // Crea una figura personalizada según el tipo seleccionado
-    function createShapeMarker(lat, lng, shape, color) {
-      const lngFactor = 0.5; // ajustar a tu ciudad si cambias de lugar
-      const size = 20;
-      const options = {
-        color: color,
-        fillColor: color,
-        fillOpacity: 1,
-        weight: 2
-      };
-      const offset = 0.000025;
-      const tOffset = 0.000020;
-      const r = 0.00003;
-      const outerR = 0.00004;
-      const innerR = 0.0000175;
-
-      switch (shape) {
-        case "circle":
-          return L.circleMarker([lat, lng], {
-            radius: 7,
-            ...options
-          });
-
-        case "square":
-          const squareCoords = [
-            [lat + offset, lng - offset / lngFactor],
-            [lat + offset, lng + offset / lngFactor],
-            [lat - offset, lng + offset / lngFactor],
-            [lat - offset, lng - offset / lngFactor]
-          ];
-
-          return L.polygon(squareCoords, options);
-
-          case "triangle":
-              const triangleCoords = [
-                [lat + tOffset, lng],                                  // vértice superior
-                [lat - tOffset, lng - tOffset / lngFactor],            // vértice inferior izquierdo
-                [lat - tOffset, lng + tOffset / lngFactor]             // vértice inferior derecho
-              ];
-
-          return L.polygon(triangleCoords, options);
-
-          case "hexagon":
-            const hexCoords = [];
-      for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i;
-            const dx = r * Math.cos(angle);
-            const dy = r * Math.sin(angle);
-          hexCoords.push([
-            lat + dy,
-            lng + dx / lngFactor
-                        ]);
-              }
-          return L.polygon(hexCoords, options);
-
-
-        case "star":
-  const starCoords = [];
-
-  for (let i = 0; i < 10; i++) {
-    const angle = (Math.PI / 5) * i; // 36° entre cada punto
-    const r = i % 2 === 0 ? outerR : innerR;
-    const dx = r * Math.cos(angle);
-    const dy = r * Math.sin(angle);
-    starCoords.push([
-      lat + dy,
-      lng + dx / lngFactor
-    ]);
-  }
-
-  return L.polygon(starCoords, options);
-
-        default:
-          return L.circleMarker([lat, lng], { radius: 10, ...options });
-      }
+  customButton.addEventListener("click", () => {
+    if (!customMode) {
+      colorPicker.style.display = "block";
+      shapeSelector.style.display = "block";
+      customMode = true;
+    } else {
+      colorPicker.style.display = "none";
+      shapeSelector.style.display = "none";
+      selectedColor = colorPicker.value;
+      selectedShape = shapeSelector.value;
+      customMode = false;
     }
+  });
 
-    // Cambiar color en tiempo real
-    colorPicker.addEventListener("input", (event) => {
-      selectedColor = event.target.value;
-      if (marker && marker.setStyle) {
-        marker.setStyle({ color: selectedColor, fillColor: selectedColor });
-      }
-    });
+  // Inicializar mapa principal
+  window.addEventListener("load", () => {
+    map = L.map("map").setView([61.2175, -149.8938], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-    // Cambiar forma si el usuario la selecciona
-   shapeSelector.addEventListener("change", (event) => {
-  selectedShape = event.target.value;
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          lastPosition = { lat, lng };
 
-  if (marker && marker.getLatLng) {
-    const pos = marker.getLatLng();
-    map.removeLayer(marker);
-    marker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+          if (marker) map.removeLayer(marker);
+          marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
+          map.setView([lat, lng], 16);
+        },
+        (error) => {
+          alert("No se pudo obtener tu ubicación.");
+          console.error(error);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      alert("Tu navegador no soporta geolocalización.");
+    }
+  });
+
+  function createShapeMarker(lat, lng, shape, color) {
+    const lngFactor = 0.5;
+    const options = { color, fillColor: color, fillOpacity: 1, weight: 2 };
+    const offset = 0.000025;
+    const tOffset = 0.000020;
+    const r = 0.00003;
+    const outerR = 0.00004;
+    const innerR = 0.0000175;
+
+    switch (shape) {
+      case "circle":
+        return L.circleMarker([lat, lng], { radius: 7, ...options });
+
+      case "square":
+        return L.polygon([
+          [lat + offset, lng - offset / lngFactor],
+          [lat + offset, lng + offset / lngFactor],
+          [lat - offset, lng + offset / lngFactor],
+          [lat - offset, lng - offset / lngFactor]
+        ], options);
+
+      case "triangle":
+        return L.polygon([
+          [lat + tOffset, lng],
+          [lat - tOffset, lng - tOffset / lngFactor],
+          [lat - tOffset, lng + tOffset / lngFactor]
+        ], options);
+
+      case "hexagon":
+        const hexCoords = [];
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i;
+          const dx = r * Math.cos(angle);
+          const dy = r * Math.sin(angle);
+          hexCoords.push([lat + dy, lng + dx / lngFactor]);
+        }
+        return L.polygon(hexCoords, options);
+
+      case "star":
+        const starCoords = [];
+        for (let i = 0; i < 10; i++) {
+          const angle = (Math.PI / 5) * i;
+          const rad = i % 2 === 0 ? outerR : innerR;
+          const dx = rad * Math.cos(angle);
+          const dy = rad * Math.sin(angle);
+          starCoords.push([lat + dy, lng + dx / lngFactor]);
+        }
+        return L.polygon(starCoords, options);
+
+      default:
+        return L.circleMarker([lat, lng], { radius: 10, ...options });
+    }
   }
-});
-document.getElementById("startButton").addEventListener("click", () => {
-  document.getElementById("inicioPantalla").style.display = "none";
-  document.getElementById("pantallaJuego").style.display = "block";
 
-  const map2 = L.map("mapPantalla").setView([61.2175, -149.8938], 14);
+  colorPicker.addEventListener("input", (e) => {
+    selectedColor = e.target.value;
+    if (marker && marker.setStyle) {
+      marker.setStyle({ color: selectedColor, fillColor: selectedColor });
+    }
+  });
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-  }).addTo(map2);
+  shapeSelector.addEventListener("change", (e) => {
+    selectedShape = e.target.value;
+    if (marker && marker.getLatLng) {
+      const pos = marker.getLatLng();
+      map.removeLayer(marker);
+      marker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+    }
+  });
 
-  // Reutiliza la última posición y configuración
-  if (lastPosition) {
-    const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
-    map2.setView([lastPosition.lat, lastPosition.lng], 16);
-  }
-});
+  document.getElementById("startButton").addEventListener("click", () => {
+    document.getElementById("inicioPantalla").style.display = "none";
+    document.getElementById("pantallaJuego").style.display = "block";
 
-  </script>
+    map2 = L.map("mapPantalla").setView([61.2175, -149.8938], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map2);
+
+    if (lastPosition) {
+      const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
+      map2.setView([lastPosition.lat, lastPosition.lng], 16);
+    }
+  });
+
+  const toggleBtn = document.getElementById("toggleSizeBtn");
+  const mapPantalla = document.getElementById("mapPantalla");
+
+  toggleBtn.addEventListener("click", () => {
+    mapExpanded = !mapExpanded;
+    mapPantalla.style.height = mapExpanded ? "100vh" : "60vh";
+    toggleBtn.textContent = mapExpanded ? "Reducir" : "Expandir";
+    if (map2) map2.invalidateSize();
+  });
+</script>
 </body>
 </html>
