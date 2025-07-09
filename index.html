@@ -103,6 +103,15 @@
 <div id="pantallaJuego">
   <button id="toggleSizeBtn">Expandir</button>
   <div id="mapPantalla" style="height: 60vh;"></div>
+  <div id="objetivos" style="padding: 20px;">
+  <h3>Mission Objetives:</h3>
+  <ul>
+    <li>📍 Llegar al punto de anclaje.</li>
+    <li>⚙️ Configurar parámetros personalizados.</li>
+    <li>🧭 Mantener señal GPS estable.</li>
+    <li>🚩 Completar todos los checkpoints.</li>
+  </ul>
+</div>
 </div>
 
 <!-- Leaflet JS -->
@@ -249,15 +258,26 @@
     }
   });
 
-  const toggleBtn = document.getElementById("toggleSizeBtn");
-  const mapPantalla = document.getElementById("mapPantalla");
+ const toggleBtn = document.getElementById("toggleSizeBtn");
+const mapPantalla = document.getElementById("mapPantalla");
+const objetivos = document.getElementById("objetivos");
 
-  toggleBtn.addEventListener("click", () => {
-    mapExpanded = !mapExpanded;
-    mapPantalla.style.height = mapExpanded ? "100vh" : "60vh";
-    toggleBtn.textContent = mapExpanded ? "Reducir" : "Expandir";
-    if (map2) map2.invalidateSize();
-  });
+toggleBtn.addEventListener("click", () => {
+  mapExpanded = !mapExpanded;
+
+  if (mapExpanded) {
+    mapPantalla.style.height = "100vh";
+    toggleBtn.textContent = "Reducir";
+    objetivos.style.display = "none";
+  } else {
+    mapPantalla.style.height = "60vh";
+    toggleBtn.textContent = "Expandir";
+    objetivos.style.display = "block";
+  }
+
+  if (map2) map2.invalidateSize();
+});
+
 </script>
 </body>
 </html>
