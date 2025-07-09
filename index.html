@@ -307,20 +307,29 @@ document.getElementById("startButton").addEventListener("click", () => {
         const obj = objetivosData[index];
         if (!completados.has(obj.id)) {
           const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
-          if (dist < 7) {
-            completados.add(obj.id);
+        if (dist < 7) {
+  completados.add(obj.id);
 
-            marker.setIcon(L.divIcon({
-              className: 'custom-icon',
-              html: `<div style="font-size: 24px;">✅</div>`
-            }));
+  marker.setIcon(L.divIcon({
+    className: 'custom-icon',
+    html: `<div style="font-size: 24px;">✅</div>`
+  }));
 
-            const li = document.getElementById(obj.id);
-            if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
-          }
+  const li = document.getElementById(obj.id);
+  if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
+
+  // Mostrar mensaje especial para obj3
+  if (obj.id === "obj3") {
+    const msgDiv = document.getElementById("graemeMsg");
+    msgDiv.style.display = "block";
+    setTimeout(() => {
+      msgDiv.style.display = "none";
+    }, 5000);
         }
-      });
-    },
+        }      
+        }
+        });
+        },
     (err) => console.error("Geolocation error (map2):", err),
     { enableHighAccuracy: true }
   );
@@ -345,6 +354,23 @@ toggleBtn.addEventListener("click", () => {
 
   if (map2) map2.invalidateSize();
 });
+
 </script>
+    <div id="graemeMsg" style="
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #007bff;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1.2em;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+">
+  HI GRAEME :)
+</div>
 </body>
 </html>
