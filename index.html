@@ -70,20 +70,28 @@
   </style>
 </head>
 <body>
-  <header>Anchorage Simulator Challenge</header>
+<body>
+  <!-- Pantalla de inicio -->
+  <div id="inicioPantalla">
+    <header>Anchorage Simulator Challenge</header>
+    <button id="customButton">Custom</button>
+    <input type="color" id="colorPicker" />
+    <select id="shapeSelector">
+      <option value="circle">Ball</option>
+      <option value="square">Square</option>
+      <option value="triangle">Triangle</option>
+      <option value="hexagon">Hexagone</option>
+      <option value="star">Star</option>
+    </select>
+    <button id="startButton">Start</button>
+    <div id="map" style="width: 100%; height: 400px;"></div>
+  </div>
 
-  <button id="customButton">Custom</button>
-  <input type="color" id="colorPicker" />
-  <select id="shapeSelector">
-    <option value="circle">Ball</option>
-    <option value="square">Square</option>
-    <option value="triangle">Triangle</option>
-    <option value="hexagon">Hexagone</option>
-    <option value="star">Star</option>
-  </select>
+  <!-- Segunda pantalla (pantalla extendida) -->
+  <div id="pantallaJuego" style="display:none; width: 100%; height: 100vh;">
+    <div id="mapPantalla" style="width: 100%; height: 100vh;"></div>
+  </div>
 
-  <button id="startButton">Start</button>
-  <div id="map"></div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -94,6 +102,8 @@
     let selectedShape = "circle";
     let marker = null;
     let map;
+    let lastPosition = null;
+
 
     const customButton = document.getElementById("customButton");
     const colorPicker = document.getElementById("colorPicker");
@@ -114,37 +124,35 @@
     });
 
     // Inicializa el mapa al cargar la página
-    window.addEventListener("load", () => {
-      map = L.map("map").setView([61.2175, -149.8938], 14);
+  window.addEventListener("load", () => {
+  map = L.map("map").setView([61.2175, -149.8938], 14);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-      }).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }).addTo(map);
 
-      // Geolocalización del usuario
-      if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        lastPosition = { lat, lng };
 
-            if (marker) {
-              map.removeLayer(marker);
-            }
+        if (marker) map.removeLayer(marker);
+        marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
+        map.setView([lat, lng], 16);
+      },
+      (error) => {
+        alert("No se pudo obtener tu ubicación.");
+        console.error(error);
+      },
+      { enableHighAccuracy: true }
+    );
+  } else {
+    alert("Tu navegador no soporta geolocalización.");
+  }
+});
 
-            marker = createShapeMarker(lat, lng, selectedShape, selectedColor).addTo(map);
-            map.setView([lat, lng], 16);
-          },
-          (error) => {
-            alert("No se pudo obtener tu ubicación.");
-            console.error(error);
-          },
-          { enableHighAccuracy: true }
-        );
-      } else {
-        alert("Tu navegador no soporta geolocalización.");
-      }
-    });
 
     // Crea una figura personalizada según el tipo seleccionado
     function createShapeMarker(lat, lng, shape, color) {
@@ -239,6 +247,22 @@
     const pos = marker.getLatLng();
     map.removeLayer(marker);
     marker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+  }
+});
+document.getElementById("startButton").addEventListener("click", () => {
+  document.getElementById("inicioPantalla").style.display = "none";
+  document.getElementById("pantallaJuego").style.display = "block";
+
+  const map2 = L.map("mapPantalla").setView([61.2175, -149.8938], 14);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }).addTo(map2);
+
+  // Reutiliza la última posición y configuración
+  if (lastPosition) {
+    const marker2 = createShapeMarker(lastPosition.lat, lastPosition.lng, selectedShape, selectedColor).addTo(map2);
+    map2.setView([lastPosition.lat, lastPosition.lng], 16);
   }
 });
 
