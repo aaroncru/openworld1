@@ -165,7 +165,6 @@
           });
 
         case "square":
-          const lngFactor = 1.9;
           const offset = 0.0001;
           const squareCoords = [
             [lat + offset, lng - offset / lngFactor],
@@ -177,7 +176,6 @@
           return L.polygon(squareCoords, options);
 
           case "triangle":
-              const lngFactor = 1.9;
               const tOffset = 0.00012;
               const triangleCoords = [
                 [lat + tOffset, lng],                                  // vértice superior
@@ -188,7 +186,6 @@
           return L.polygon(triangleCoords, options);
 
           case "hexagon":
-            const lngFactor = 1.9;
             const r = 0.00012;
             const hexCoords = [];
       for (let i = 0; i < 6; i++) {
@@ -204,7 +201,6 @@
 
 
         case "star":
-  const lngFactor = 1.9;
   const outerR = 0.0002;
   const innerR = 0.00008;
   const starCoords = [];
