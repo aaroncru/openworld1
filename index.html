@@ -148,7 +148,7 @@
 
     // Crea una figura personalizada según el tipo seleccionado
     function createShapeMarker(lat, lng, shape, color) {
-      const lngFactor = 0.7; // ajustar a tu ciudad si cambias de lugar
+      const lngFactor = 0.5; // ajustar a tu ciudad si cambias de lugar
       const size = 20;
       const options = {
         color: color,
@@ -176,7 +176,7 @@
           return L.polygon(squareCoords, options);
 
           case "triangle":
-              const tOffset = 0.00012;
+              const tOffset = 0.00009;
               const triangleCoords = [
                 [lat + tOffset, lng],                                  // vértice superior
                 [lat - tOffset, lng - tOffset / lngFactor],            // vértice inferior izquierdo
