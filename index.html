@@ -117,6 +117,8 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- ... el mismo head y estilos que ya tienes ... -->
+
 <script>
 const objetivosData = [
   { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.218, lng: -149.893 },
@@ -130,8 +132,8 @@ let completados = new Set();
 let customMode = false;
 let selectedColor = "#ff0000";
 let selectedShape = "circle";
-let marker = null;
 let map, map2;
+let userMarker = null;
 let lastPosition = null;
 let mapExpanded = false;
 
@@ -140,14 +142,38 @@ const colorPicker = document.getElementById("colorPicker");
 const shapeSelector = document.getElementById("shapeSelector");
 
 customButton.addEventListener("click", () => {
-  const show = !customMode;
-  colorPicker.style.display = show ? "block" : "none";
-  shapeSelector.style.display = show ? "block" : "none";
-  customMode = show;
+  customMode = !customMode;
+  colorPicker.style.display = customMode ? "block" : "none";
+  shapeSelector.style.display = customMode ? "block" : "none";
 
-  if (!show) {
+  if (!customMode) {
     selectedColor = colorPicker.value;
     selectedShape = shapeSelector.value;
+
+    // Actualiza marcador si existe
+    if (userMarker && userMarker.getLatLng) {
+      const pos = userMarker.getLatLng();
+      map.removeLayer(userMarker);
+      userMarker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+    }
+  }
+});
+
+colorPicker.addEventListener("input", (e) => {
+  selectedColor = e.target.value;
+  if (userMarker && userMarker.getLatLng) {
+    const pos = userMarker.getLatLng();
+    map.removeLayer(userMarker);
+    userMarker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
+  }
+});
+
+shapeSelector.addEventListener("change", (e) => {
+  selectedShape = e.target.value;
+  if (userMarker && userMarker.getLatLng) {
+    const pos = userMarker.getLatLng();
+    map.removeLayer(userMarker);
+    userMarker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
   }
 });
 
@@ -232,6 +258,12 @@ window.addEventListener("load", () => {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
         lastPosition = { lat: userLat, lng: userLng };
+
+        if (userMarker) {
+          userMarker.setLatLng([userLat, userLng]);
+        } else {
+          userMarker = createShapeMarker(userLat, userLng, selectedShape, selectedColor).addTo(map);
+        }
       },
       (err) => console.error("Geolocation error:", err),
       { enableHighAccuracy: true }
