@@ -161,12 +161,14 @@ customButton.addEventListener("click", () => {
 
 colorPicker.addEventListener("input", (e) => {
   selectedColor = e.target.value;
+
   if (userMarker && userMarker.getLatLng) {
     const pos = userMarker.getLatLng();
     map.removeLayer(userMarker);
     userMarker = createShapeMarker(pos.lat, pos.lng, selectedShape, selectedColor).addTo(map);
   }
 });
+
 
 shapeSelector.addEventListener("change", (e) => {
   selectedShape = e.target.value;
