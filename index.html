@@ -148,6 +148,7 @@
 
     // Crea una figura personalizada según el tipo seleccionado
     function createShapeMarker(lat, lng, shape, color) {
+      const lngFactor = 1.9; // ajustar a tu ciudad si cambias de lugar
       const size = 20;
       const options = {
         color: color,
@@ -164,50 +165,62 @@
           });
 
         case "square":
+          const lngFactor = 1.9;
+          const offset = 0.0001;
           const squareCoords = [
-            [lat + 0.0001, lng - 0.0001],
-            [lat + 0.0001, lng + 0.0001],
-            [lat - 0.0001, lng + 0.0001],
-            [lat - 0.0001, lng - 0.0001]
+            [lat + offset, lng - offset / lngFactor],
+            [lat + offset, lng + offset / lngFactor],
+            [lat - offset, lng + offset / lngFactor],
+            [lat - offset, lng - offset / lngFactor]
           ];
+
           return L.polygon(squareCoords, options);
 
-        case "triangle":
-          const triangleCoords = [
-            [lat + 0.00010, lng],
-            [lat - 0.0001, lng - 0.0001],
-            [lat - 0.0001, lng + 0.0001]
-          ];
+          case "triangle":
+              const lngFactor = 1.9;
+              const tOffset = 0.00012;
+              const triangleCoords = [
+                [lat + tOffset, lng],                                  // vértice superior
+                [lat - tOffset, lng - tOffset / lngFactor],            // vértice inferior izquierdo
+                [lat - tOffset, lng + tOffset / lngFactor]             // vértice inferior derecho
+              ];
+
           return L.polygon(triangleCoords, options);
 
-        case "hexagon":
-          const r = 0.00010;
-          const hexCoords = [];
-          for (let i = 0; i < 6; i++) {
+          case "hexagon":
+            const lngFactor = 1.9;
+            const r = 0.00012;
+            const hexCoords = [];
+      for (let i = 0; i < 6; i++) {
             const angle = (Math.PI / 3) * i;
-            hexCoords.push([
-              lat + r * Math.cos(angle),
-              lng + r * Math.sin(angle)
-            ]);
-          }
+            const dx = r * Math.cos(angle);
+            const dy = r * Math.sin(angle);
+          hexCoords.push([
+            lat + dy,
+            lng + dx / lngFactor
+                        ]);
+              }
           return L.polygon(hexCoords, options);
 
+
         case "star":
-          const starCoords = [
-            [lat + 0.0002, lng],
-            [lat + 0.00005, lng + 0.00005],
-            [lat + 0.0001, lng + 0.0002],
-            [lat, lng + 0.00008],
-            [lat - 0.0001, lng + 0.0002],
-            [lat - 0.00005, lng + 0.00005],
-            [lat - 0.0002, lng],
-            [lat - 0.00005, lng - 0.00005],
-            [lat - 0.0001, lng - 0.0002],
-            [lat, lng - 0.00008],
-            [lat + 0.0001, lng - 0.0002],
-            [lat + 0.00005, lng - 0.00005]
-          ];
-          return L.polygon(starCoords, options);
+  const lngFactor = 1.9;
+  const outerR = 0.0002;
+  const innerR = 0.00008;
+  const starCoords = [];
+
+  for (let i = 0; i < 10; i++) {
+    const angle = (Math.PI / 5) * i; // 36° entre cada punto
+    const r = i % 2 === 0 ? outerR : innerR;
+    const dx = r * Math.cos(angle);
+    const dy = r * Math.sin(angle);
+    starCoords.push([
+      lat + dy,
+      lng + dx / lngFactor
+    ]);
+  }
+
+  return L.polygon(starCoords, options);
 
         default:
           return L.circleMarker([lat, lng], { radius: 10, ...options });
