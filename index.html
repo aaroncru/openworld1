@@ -156,16 +156,16 @@
         fillOpacity: 1,
         weight: 2
       };
-      const offset = 0.00005;
-      const tOffset = 0.000045;
-      const r = 0.00006;
-      const outerR = 0.00008;
-      const innerR = 0.000035;
+      const offset = 0.000025;
+      const tOffset = 0.000020;
+      const r = 0.00003;
+      const outerR = 0.00004;
+      const innerR = 0.0000175;
 
       switch (shape) {
         case "circle":
           return L.circleMarker([lat, lng], {
-            radius: 6,
+            radius: 7,
             ...options
           });
 
