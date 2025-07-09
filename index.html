@@ -106,10 +106,10 @@
   <div id="objetivos" style="padding: 20px;">
     <h3>Mission Objectives:</h3>
     <ul id="listaObjetivos">
-      <li id="obj1">📍 Llegar al punto de anclaje</li>
-      <li id="obj2">⚙️ Configurar parámetros personalizados</li>
-      <li id="obj3">🧭 Mantener señal GPS estable</li>
-      <li id="obj4">🚩 Completar todos los checkpoints</li>
+      <li id="obj1">📍 Complete checkpoint one</li>
+      <li id="obj2">📍 Complete checkpoint two</li>
+      <li id="obj3">📍 Complete checkpoint three</li>
+      <li id="obj4">📍 Complete checkpoint four</li>
     </ul>
   </div>
 </div>
@@ -122,9 +122,9 @@
 <script>
 const objetivosData = [
   { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.218, lng: -149.893 },
-  { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.219, lng: -149.894 },
-  { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.217, lng: -149.895 },
-  { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.216, lng: -149.892 }
+  { id: "obj2", emoji: "📍", name: "Parámetros", lat: 61.219, lng: -149.894 },
+  { id: "obj3", emoji: "📍", name: "GPS", lat: 61.217, lng: -149.895 },
+  { id: "obj4", emoji: "📍", name: "Checkpoints", lat: 61.216, lng: -149.892 }
 ];
 
 let objetivoMarkers = [];
@@ -335,11 +335,11 @@ toggleBtn.addEventListener("click", () => {
 
   if (mapExpanded) {
     mapPantalla.style.height = "100vh";
-    toggleBtn.textContent = "Reducir";
+    toggleBtn.textContent = "Reduce";
     objetivos.style.display = "none";
   } else {
     mapPantalla.style.height = "60vh";
-    toggleBtn.textContent = "Expandir";
+    toggleBtn.textContent = "Expand";
     objetivos.style.display = "block";
   }
 
