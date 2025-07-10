@@ -319,7 +319,7 @@ document.getElementById("startButton").addEventListener("click", () => {
         const obj = objetivosData[index];
         if (!completados.has(obj.id)) {
           const dist = getDistance(userLat, userLng, obj.lat, obj.lng);
-          if (dist < 7) {
+          if (dist < 15) {
             completados.add(obj.id);
 
             marker.setIcon(L.divIcon({
