@@ -121,10 +121,10 @@
 
 <script>
 const objetivosData = [
-  { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.2177, lng: -149.8960 },
-  { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.2177, lng: -149.89658 },
-  { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.2179, lng: -149.8957 },
-  { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.2175, lng: -149.8956 }
+  { id: "obj1", emoji: "📍", name: "Anclaje", lat: 61.2177, lng: -149.8960, url: "https://aaroncru.github.io/obj1OpenWorld1/"},
+  { id: "obj2", emoji: "⚙️", name: "Parámetros", lat: 61.2177, lng: -149.89658, url: "https://aaroncru.github.io/obj2OpenWorld1/"},
+  { id: "obj3", emoji: "🧭", name: "GPS", lat: 61.2179, lng: -149.8957, url: "https://aaroncru.github.io/obj3OpenWorld1/" },
+  { id: "obj4", emoji: "🚩", name: "Checkpoints", lat: 61.2175, lng: -149.8956, url: "https://aaroncru.github.io/obj4OpenWorld1/" }
 ];
 
 let objetivoMarkers = [];
@@ -330,9 +330,10 @@ document.getElementById("startButton").addEventListener("click", () => {
             const li = document.getElementById(obj.id);
             if (li) li.innerHTML = `<s>✅ ${li.textContent}</s>`;
 
-            if (obj.id === "obj3") {
-              window.location.href = "https://aaroncru.github.io/obj3OpenWorld1/";
-            }
+           if (obj.url) {
+  window.open(obj.url, "_blank");
+}
+
           }
         }
       });
